@@ -1,70 +1,62 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Globalization;
+using System.Collections.Generic;
 
 public class Keypad : MonoBehaviour
 {
 	public Vector2 HiddenPosition;
 	public Vector2 VisualPosition;
 	public bool Hidden;
-	int[] valuesPressed;
+	public LetterArray letters;
 	int index;
-	Square[] Squares;
+	KeypadSquare[] squares;
 
-	// Use this for initializatio
 	void Start ()
 	{
-		Squares = GetComponentsInChildren <Square> ();
-		valuesPressed = new int[3];
 		VisualPosition = Vector2.zero;
-		HiddenPosition = new Vector2 (12f, 0);
-		index = 0;
+		HiddenPosition = new Vector2 (25f, 0);
 		Hidden = true;
+		index = -1;
 		transform.position = HiddenPosition;
+		squares = GetComponentsInChildren<KeypadSquare> ();
 	}
 
-	void Update ()
+	public void ToggleOn (int id)
 	{
-		if (Input.GetKeyDown (KeyCode.Space)) {
-			if (Hidden)
-				Visualize ();
-			else
-				Hide ();
-		}
+		index = id;
+		if (Hidden)
+			Visualize ();
+		else
+			Hide ();
 	}
 
-	public void SquarePressed (int number, int row)
+	public void ToggleOff ()
 	{
-		index++;
-
-		foreach (var item in Squares) {
-			if (row == item.Row) {
-				item.Disable ();
-			}
-			if (number == item.Number) {
-				item.Activate ();
-			}
-		}
+		if (!Hidden)
+			Hide ();
+		else
+			Visualize ();
 	}
 
+	public void Accepted (string letter)
+	{
+		letters.AddLetterToHex (index, letter);
+		Hide ();
+	}
 
 	void Visualize ()
 	{
 		Hidden = false;
-		LeanTween.moveLocal (gameObject, VisualPosition, 1f);
+		LeanTween.moveLocal (gameObject, VisualPosition, .3f);
+		foreach (var item in squares) {
+			item.Activate ();
+		}
 	}
 
 	void Hide ()
 	{
 		Hidden = true;
-		LeanTween.moveLocal (gameObject, HiddenPosition, 1f);
-	}
-
-	public void Reset ()
-	{
-		index = 0;
-		foreach (var s in Squares) {
-			s.Reset ();
-		}
+		LeanTween.moveLocal (gameObject, HiddenPosition, .3f);
 	}
 }
